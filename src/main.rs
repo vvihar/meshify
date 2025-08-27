@@ -184,3 +184,54 @@ fn get_mesh_code(lat: f64, lon: f64, level: MeshLevel) -> String {
     // Eighthが最後のレベルなので、そのまま返す
     code
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*; // main.rs内の関数やenumをテストコードで使えるようにする
+
+    /// 度分秒 (DMS) を 十進数度 (Decimal Degrees) に変換するヘルパー関数
+    fn dms_to_dd(d: f64, m: f64, s: f64) -> f64 {
+        d + m / 60.0 + s / 3600.0
+    }
+
+    #[test]
+    fn test_sapporo_standard() {
+        // 資料 p.14 表7 北海道札幌市
+        let lat = dms_to_dd(43.0, 3.0, 30.0);
+        let lon = dms_to_dd(141.0, 20.0, 15.0);
+        let expected = "64414277";
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Standard), expected);
+    }
+
+    #[test]
+    fn test_tokyo_standard() {
+        // 資料 p.14 表7 東京都新宿区
+        let lat = dms_to_dd(35.0, 41.0, 0.0);
+        let lon = dms_to_dd(139.0, 41.0, 15.0);
+        let expected = "53394525";
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Standard), expected);
+    }
+
+    #[test]
+    fn test_naha_standard() {
+        // 資料 p.14 表7 沖縄県那覇市
+        let lat = dms_to_dd(26.0, 12.0, 30.0);
+        let lon = dms_to_dd(127.0, 40.0, 30.0);
+        let expected = "39272554";
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Standard), expected);
+    }
+
+    #[test]
+    fn test_tokyo_all_levels() {
+        // 東京都新宿区の座標で、すべてのメッシュレベルをテスト
+        let lat = dms_to_dd(35.0, 41.0, 0.0);
+        let lon = dms_to_dd(139.0, 41.0, 15.0);
+
+        // 各レベルで期待されるコードを検証
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Standard), "53394525");
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Half), "533945251");
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Quarter), "5339452511");
+        assert_eq!(get_mesh_code(lat, lon, MeshLevel::Eighth), "53394525111");
+    }
+}
+
